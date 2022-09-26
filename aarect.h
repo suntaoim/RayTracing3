@@ -48,6 +48,27 @@ public:
             point3(x1, k + 0.0001, z1));
         return true;
     }
+
+    virtual double pdf_value(const point3& origin, const vec3& v)
+    const override {
+        hit_record rec;
+        if (!this->hit(ray(origin, v), 0.001, infinity, rec))
+            return 0;
+
+        auto area = (x1 - x0) * (z1 - z0);
+        auto distance_squared = rec.t * rec.t * v.length_squared();
+        auto cosine = fabs(dot(unit_vector(v), rec.normal));
+
+        return distance_squared / (cosine * area);
+    }
+
+    virtual vec3 random(const point3& origin) const override {
+        // A random point at light source
+        auto random_point = point3(random_double(x0, x1), k,
+            random_double(z0, z1));
+        // A light from origin point to light source
+        return random_point - origin;
+    }
 };
 
 class yz_rect : public hittable {
